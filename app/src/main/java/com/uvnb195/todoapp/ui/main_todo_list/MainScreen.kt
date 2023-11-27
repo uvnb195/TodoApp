@@ -4,6 +4,7 @@ package com.uvnb195.todoapp.ui.main_todo_list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Checkbox
@@ -55,6 +55,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.uvnb195.todoapp.R
 import com.uvnb195.todoapp.data.Todo
+import com.uvnb195.todoapp.util.Routes
 import com.uvnb195.todoapp.util.UiEvent
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -167,7 +168,13 @@ fun PageItem(
         }
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(todos.value) { todo ->
-                TodoItem(todo = todo, onEvent = viewModel::onEvent)
+                TodoItem(
+                    todo = todo,
+                    onEvent = viewModel::onEvent,
+                    modifier = Modifier.clickable {
+                        viewModel.onEvent(TodoListEvent.OnTodoClicked(todo))
+                    }
+                )
             }
         }
     }
@@ -251,7 +258,7 @@ fun MainScreen(
                                 ),
                         ) {
                             Icon(
-                                imageVector =   Icons.Outlined.Home,
+                                imageVector = Icons.Outlined.Home,
                                 contentDescription = "Home",
                                 modifier = Modifier.fillMaxSize(),
                             )
@@ -293,7 +300,7 @@ fun MainScreen(
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primary),
                         onClick = {
-//                            viewModel.sendUiEvent(UiEvent.Navigate(Routes.EDIT_ADD_TODO))
+                            viewModel.sendUiEvent(UiEvent.Navigate(Routes.EDIT_ADD_TODO))
                         }) {
                         Icon(
                             imageVector = Icons.Default.Add,

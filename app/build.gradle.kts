@@ -95,4 +95,9 @@ dependencies {
 
     //Constrait Layout
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+    //Calender Maxkeppeler library
+    implementation("com.maxkeppeler.sheets-compose-dialogs:core:1.2.0")     //core
+    implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:1.2.0") //calendar
+
 }

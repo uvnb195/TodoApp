@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.uvnb195.todoapp.ui.edit_add_todo.EditAddScreen
 import com.uvnb195.todoapp.ui.main_todo_list.MainScreen
 import com.uvnb195.todoapp.ui.theme.TodoAppTheme
 import com.uvnb195.todoapp.util.Routes
@@ -34,7 +37,19 @@ class MainActivity : ComponentActivity() {
                         startDestination = Routes.MAIN_TODO_LIST
                     ) {
                         composable(Routes.MAIN_TODO_LIST) {
-                            MainScreen(onNavigate = {})
+                            MainScreen(onNavigate = { navController.navigate(it.route) })
+                        }
+
+                        composable(Routes.EDIT_ADD_TODO + "?todoId={todoId}",
+                            arguments = listOf(
+                                navArgument("todoId") {
+                                    type = NavType.IntType
+                                    defaultValue = -1
+                                }
+                            )) {
+                            EditAddScreen {
+                                navController.popBackStack()
+                            }
                         }
                     }
                 }
