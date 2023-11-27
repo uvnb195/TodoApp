@@ -17,6 +17,9 @@ interface Dao {
     @Query("SELECT * FROM Todo WHERE id= :id")
     suspend fun getTodoById(id: Int): Todo?
 
+    @Query("SELECT * FROM Todo WHERE isDone= 0")
+    suspend fun getTodosDone(): Flow<List<Todo>>
+
     @Query("SELECT * FROM Todo")
     fun getAll(): Flow<List<Todo>>
 }

@@ -2,6 +2,7 @@ package com.uvnb195.todoapp.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.Date
 
 @Entity
 data class Todo(
@@ -9,5 +10,5 @@ data class Todo(
     val title: String,
     val description: String?,
     val isDone: Boolean = false,
-    val date: Long
+    val date: Date
 )
