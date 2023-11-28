@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,6 +43,7 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
+import com.uvnb195.todoapp.R
 import com.uvnb195.todoapp.util.UiEvent
 import java.time.format.DateTimeFormatter
 
@@ -88,8 +89,9 @@ fun EditAddScreen(
                 onClick = { viewModel.onEvent(EditAddEvent.OnSaveTodo) }) {
                 Icon(
                     modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Rounded.Check, contentDescription = "Save",
-                    tint = MaterialTheme.colorScheme.background
+                    painter = painterResource(id = R.drawable.check_alt),
+                    contentDescription = "Save",
+                    tint = Color.White
                 )
             }
         }
@@ -98,9 +100,11 @@ fun EditAddScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
                 Text(
                     text = viewModel.screenTitle,
                     style = MaterialTheme.typography.titleMedium,
@@ -142,10 +146,10 @@ fun EditAddScreen(
                         Text(
                             text = "Description...",
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     },
-                    textStyle = MaterialTheme.typography.titleLarge,
+                    textStyle = MaterialTheme.typography.bodyMedium,
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = MaterialTheme.colorScheme.primary,
                         unfocusedTextColor = MaterialTheme.colorScheme.primary,
@@ -174,7 +178,7 @@ fun EditAddScreen(
                     modifier = Modifier.fillMaxWidth(),
                     value = viewModel.date.format(localFormat),
                     onValueChange = {},
-                    textStyle = MaterialTheme.typography.titleLarge,
+                    textStyle = MaterialTheme.typography.bodyLarge,
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = MaterialTheme.colorScheme.primary,
                         unfocusedTextColor = MaterialTheme.colorScheme.primary,
@@ -220,7 +224,8 @@ fun EditAddScreen(
                     .size(64.dp),
                 onClick = { viewModel.onEvent(EditAddEvent.OnCanceled) }) {
                 Icon(
-                    imageVector = Icons.Outlined.Close, contentDescription = "Close",
+                    painter = painterResource(id = R.drawable.x),
+                    contentDescription = "Close",
                     modifier = Modifier.size(40.dp)
                 )
             }

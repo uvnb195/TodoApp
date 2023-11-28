@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.Flow
 class TodoRepositoryImpl(
     private val dao: Dao
 ) : TodoRepository {
-    override suspend fun deleteTodo(todo: Todo) {
-        dao.deleteTodo(todo)
+    override suspend fun deleteDoneTodo() {
+        dao.deleteDoneTodo()
     }
 
     override suspend fun upsertTodo(todo: Todo) {

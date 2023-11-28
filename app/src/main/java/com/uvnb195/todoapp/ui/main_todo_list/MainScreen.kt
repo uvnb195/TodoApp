@@ -23,10 +23,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Checklist
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Divider
@@ -38,18 +34,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,6 +61,7 @@ import java.text.SimpleDateFormat
 
 @Composable
 fun TodoItem(
+    color: Color,
     todo: Todo,
     modifier: Modifier = Modifier,
     onEvent: (TodoListEvent) -> Unit,
@@ -81,14 +81,16 @@ fun TodoItem(
                     onEvent(TodoListEvent.OnDoneChanged(todo, it))
                 },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colorScheme.primary
+                    checkedColor = color,
+                    uncheckedColor = color
                 )
             )
             Text(
                 text = todo.title.uppercase(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                textDecoration = if (color == MaterialTheme.colorScheme.primary) TextDecoration.None else TextDecoration.LineThrough
             )
             Text(
                 text = formatter.format(todo.date),
@@ -96,12 +98,11 @@ fun TodoItem(
             )
         }
         Divider(
-            color = MaterialTheme.colorScheme.primary,
+            color = color,
             modifier = modifier
-                .fillMaxHeight()
                 .width(4.dp)
+                .fillMaxHeight()
                 .align(Alignment.CenterEnd)
-                .padding(vertical = 8.dp)
         )
     }
 
@@ -113,17 +114,25 @@ fun PageItem(
     title: String,
     viewModel: MainViewModel = hiltViewModel()
 ) {
+    val todos: State<List<Todo>>
+    val mainColor: Color
+    when (title) {
+        "My Task" -> {
+            todos = viewModel.todos.collectAsState(initial = emptyList())
+            mainColor = MaterialTheme.colorScheme.primary
+        }
 
-    val todos = when (title) {
-        "My Task" -> viewModel.todos.collectAsState(initial = emptyList())
-        else -> viewModel.doneTodos.collectAsState(initial = emptyList())
+        else -> {
+            todos = viewModel.doneTodos.collectAsState(initial = emptyList())
+            mainColor = MaterialTheme.colorScheme.secondary
+        }
     }
 
     Column(modifier = modifier) {
         ConstraintLayout(
             modifier = Modifier.fillMaxWidth()
         ) {
-            val (text, noti, mode) = createRefs()
+            val (text, noti) = createRefs()
 
             Text(
                 modifier = Modifier.constrainAs(text) {
@@ -134,13 +143,13 @@ fun PageItem(
                 },
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = mainColor
             )
             Box(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     .constrainAs(noti) {
                         start.linkTo(text.end, margin = 4.dp)
                         top.linkTo(parent.top)
@@ -150,31 +159,30 @@ fun PageItem(
             ) {
                 Text(
                     text = todos.value.size.toString(),
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            IconButton(
-                modifier = Modifier.constrainAs(mode) {
-                    top.linkTo(parent.top)
-                    end.linkTo(parent.end)
-                },
-                onClick = { /*TODO*/ }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.cloud_moon),
-                    contentDescription = "Mode",
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.surface
                 )
             }
         }
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(16.dp)
+                .weight(1f)
+        ) {
             items(todos.value) { todo ->
                 TodoItem(
+                    color = mainColor,
                     todo = todo,
                     onEvent = viewModel::onEvent,
-                    modifier = Modifier.clickable {
-                        viewModel.onEvent(TodoListEvent.OnTodoClicked(todo))
-                    }
+                    modifier = Modifier
+                        .shadow(4.dp)
+                        .height(50.dp)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable {
+                            viewModel.onEvent(TodoListEvent.OnTodoClicked(todo))
+                        }
                 )
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -193,6 +201,8 @@ fun MainScreen(
 
     val snackBarState = remember { SnackbarHostState() }
 
+    val pagerState = rememberPagerState { 2 }
+
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect {
             when (it) {
@@ -206,10 +216,6 @@ fun MainScreen(
                         actionLabel = it.action,
                         duration = SnackbarDuration.Short
                     )
-
-                    if (result == SnackbarResult.ActionPerformed) {
-                        viewModel.onEvent(TodoListEvent.OnUndoDeletedTodo)
-                    }
                 }
 
                 else -> Unit
@@ -223,97 +229,111 @@ fun MainScreen(
             SnackbarHost(snackBarState)
         }
     ) {
-        Column(modifier = Modifier.padding(top = it.calculateTopPadding())) {
-            val pagerState = rememberPagerState { 2 }
-            HorizontalPager(
-                modifier = Modifier.weight(1f),
-                state = pagerState
-            ) { page ->
-                title = if (page % 2 == 0) "My Task" else "Completed"
-                PageItem(title = title)
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(0)
-                                }
-                            },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .align(Alignment.Center)
-                                .background(
-                                    if (pagerState.currentPage == 0) MaterialTheme.colorScheme.primary.copy(
-                                        alpha = 0.3f
-                                    ) else Color.Transparent
-                                ),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Home,
-                                contentDescription = "Home",
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        }
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(1)
-                                }
-                            },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .align(Alignment.Center)
-                                .background(
-                                    if (pagerState.currentPage == 1) MaterialTheme.colorScheme.primary.copy(
-                                        alpha = 0.3f
-                                    ) else Color.Transparent
-                                ),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Checklist,
-                                contentDescription = "Completed",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            Column(modifier = Modifier.padding(top = it.calculateTopPadding())) {
+                HorizontalPager(
+                    modifier = Modifier.weight(1f),
+                    state = pagerState
+                ) { page ->
+                    title = if (page % 2 == 0) "My Task" else "Completed"
+                    PageItem(title = title)
                 }
+
                 Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 24.dp)
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 ) {
-                    IconButton(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
-                        onClick = {
-                            viewModel.sendUiEvent(UiEvent.Navigate(Routes.EDIT_ADD_TODO))
-                        }) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add",
-                            tint = MaterialTheme.colorScheme.surface,
-                            modifier = Modifier.size(28.dp)
-                        )
-
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(0)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .size(48.dp)
+                                    .align(Alignment.Center)
+                                    .background(
+                                        if (pagerState.currentPage == 0) MaterialTheme.colorScheme.primary.copy(
+                                            alpha = 0.3f
+                                        ) else Color.Transparent
+                                    ),
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.home),
+                                    contentDescription = "Home",
+                                    Modifier.size(40.dp)
+                                )
+                            }
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(1)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .align(Alignment.Center)
+                                    .background(
+                                        if (pagerState.currentPage == 1) MaterialTheme.colorScheme.primary.copy(
+                                            alpha = 0.3f
+                                        ) else Color.Transparent
+                                    ),
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.list),
+                                    contentDescription = "Completed",
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            IconButton(
+                modifier = Modifier
+                    .padding(bottom = 24.dp)
+                    .shadow(4.dp, shape = CircleShape)
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (pagerState.currentPage == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                    )
+                    .align(Alignment.BottomCenter),
+                onClick = {
+                    if (pagerState.currentPage == 0)
+                        viewModel.sendUiEvent(UiEvent.Navigate(Routes.EDIT_ADD_TODO))
+                    else viewModel.onEvent(TodoListEvent.OnDeletedDoneTodo)
+                }) {
+                Icon(
+                    painterResource(id = if (pagerState.currentPage == 0) R.drawable.plus else R.drawable.trash),
+                    contentDescription = "Add",
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
 
+            }
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 8.dp)
+                    .size(24.dp),
+                onClick = { /*TODO*/ }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.moon),
+                    contentDescription = "Light Mode"
+                )
+            }
         }
     }
 

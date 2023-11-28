@@ -84,7 +84,7 @@ class EditAddViewModel @Inject constructor(
                                 title = title,
                                 description = desc,
                                 date = DateUtils.asDate(date),
-                                isDone = todo?.isDone ?: false
+                                isDone = false
                             )
                         )
                     }

@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface Dao {
-    @Delete
-    suspend fun deleteTodo(todo: Todo)
+    @Query("DELETE FROM Todo WHERE isDone= 1")
+    suspend fun deleteDoneTodo()
 
     @Upsert
     suspend fun upsertTodo(todo: Todo)
@@ -20,6 +20,6 @@ interface Dao {
     @Query("SELECT * FROM Todo WHERE isDone= 1")
     fun getTodosDone(): Flow<List<Todo>>
 
-    @Query("SELECT * FROM Todo ORDER BY date DESC")
+    @Query("SELECT * FROM Todo WHERE isDone= 0")
     fun getAll(): Flow<List<Todo>>
 }

@@ -20,8 +20,6 @@ class MainViewModel @Inject constructor(
     val todos = repo.getAll()
     val doneTodos = repo.getTodosDone()
 
-    private var cacheDeletedTodo: Todo? = null
-
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
@@ -31,14 +29,12 @@ class MainViewModel @Inject constructor(
                 TODO()
             }
 
-            is TodoListEvent.OnDeletedTodo -> {
+            is TodoListEvent.OnDeletedDoneTodo -> {
                 viewModelScope.launch {
-                    cacheDeletedTodo = event.todo
-                    repo.deleteTodo(event.todo)
+                    repo.deleteDoneTodo()
                     sendUiEvent(
                         UiEvent.ShowSnackBar(
-                            message = "Item was deleted!",
-                            action = "Undo"
+                            message = "Items was deleted!"
                         )
                     )
                 }
@@ -56,15 +52,6 @@ class MainViewModel @Inject constructor(
 
             is TodoListEvent.OnTodoClicked -> {
                 sendUiEvent(UiEvent.Navigate(Routes.EDIT_ADD_TODO + "?todoId=${event.todo.id}"))
-            }
-
-            is TodoListEvent.OnUndoDeletedTodo -> {
-                viewModelScope.launch {
-                    cacheDeletedTodo?.let {
-                        repo.upsertTodo(it)
-                        cacheDeletedTodo = null
-                    }
-                }
             }
         }
     }
