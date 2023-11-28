@@ -325,17 +325,17 @@ fun MainScreen(
                 )
 
             }
-            IconButton(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 8.dp, end = 8.dp)
-                    .size(24.dp),
-                onClick = { /*TODO*/ }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.moon),
-                    contentDescription = "Light Mode"
-                )
-            }
+//            IconButton(
+//                modifier = Modifier
+//                    .align(Alignment.TopEnd)
+//                    .padding(top = 8.dp, end = 8.dp)
+//                    .size(24.dp),
+//                onClick = { /*TODO*/ }) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.moon),
+//                    contentDescription = "Light Mode"
+//                )
+//            }
         }
     }
 
