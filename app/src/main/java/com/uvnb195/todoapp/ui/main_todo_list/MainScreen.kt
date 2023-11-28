@@ -313,7 +313,9 @@ fun MainScreen(
                 onClick = {
                     if (pagerState.currentPage == 0)
                         viewModel.sendUiEvent(UiEvent.Navigate(Routes.EDIT_ADD_TODO))
-                    else viewModel.onEvent(TodoListEvent.OnDeletedDoneTodo)
+                    else {
+                        viewModel.onEvent(TodoListEvent.OnDeletedDoneTodo)
+                    }
                 }) {
                 Icon(
                     painterResource(id = if (pagerState.currentPage == 0) R.drawable.plus else R.drawable.trash),

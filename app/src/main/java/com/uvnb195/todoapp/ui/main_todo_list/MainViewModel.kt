@@ -2,7 +2,6 @@ package com.uvnb195.todoapp.ui.main_todo_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.uvnb195.todoapp.data.Todo
 import com.uvnb195.todoapp.data.TodoRepository
 import com.uvnb195.todoapp.util.Routes
 import com.uvnb195.todoapp.util.UiEvent
@@ -31,12 +30,16 @@ class MainViewModel @Inject constructor(
 
             is TodoListEvent.OnDeletedDoneTodo -> {
                 viewModelScope.launch {
-                    repo.deleteDoneTodo()
-                    sendUiEvent(
-                        UiEvent.ShowSnackBar(
-                            message = "Items was deleted!"
-                        )
-                    )
+                    doneTodos.collect {
+                        if (it.isNotEmpty()) {
+                            repo.deleteDoneTodo()
+                            sendUiEvent(
+                                UiEvent.ShowSnackBar(
+                                    message = "Items was deleted!"
+                                )
+                            )
+                        }
+                    }
                 }
             }
 
