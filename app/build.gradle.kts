@@ -100,4 +100,7 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:core:1.2.0")     //core
     implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:1.2.0") //calendar
 
+    //System UI Controller Accompanist
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
+
 }
