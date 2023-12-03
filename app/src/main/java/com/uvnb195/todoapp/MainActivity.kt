@@ -37,7 +37,9 @@ class MainActivity : ComponentActivity() {
                         startDestination = Routes.MAIN_TODO_LIST
                     ) {
                         composable(Routes.MAIN_TODO_LIST) {
-                            MainScreen(onNavigate = { navController.navigate(it.route) })
+                            MainScreen(
+                                modifier = Modifier.fillMaxSize(),
+                                onNavigate = { navController.navigate(it.route) })
                         }
 
                         composable(Routes.EDIT_ADD_TODO + "?todoId={todoId}",
