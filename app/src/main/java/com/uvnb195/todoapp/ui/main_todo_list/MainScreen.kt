@@ -89,8 +89,7 @@ fun TodoItem(
     var visible by remember {
         mutableStateOf(false)
     }
-    LaunchedEffect(Unit) {
-        delay((index + 1) * 100L)
+    LaunchedEffect(true) {
         visible = true
     }
     AnimatedVisibility(visible = visible,
